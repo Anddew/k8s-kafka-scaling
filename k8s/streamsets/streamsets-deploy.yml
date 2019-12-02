@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: streamsets
+  generateName: streamsets
+  labels:
+    app: streamsets
+spec:
+  serviceName: streamsets
+  replicas: 1
+  template:
+    metadata:
+      name: streamsets
+      labels:
+        app: streamsets
+    spec:
+      containers:
+        - name: streamsets
+          image: abylinovich/streamsets:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 18630
+              name: streamsets-ui
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: streamsets

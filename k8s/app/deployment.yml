@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-streams-scaling
+  labels:
+    app: kafka-streams-scaling
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: kafka-streams-scaling
+      labels:
+        app: kafka-streams-scaling
+    spec:
+      volumes:
+        - name: jmx-config
+          configMap:
+            name: kafka-streams-scaling-jmx-configmap # refer jmx-config-map.yaml below
+      containers:
+        - name: kafka-streams-scaling # Kafka Streams app container
+          image: abylinovich/kafka-streams-app:latest
+          imagePullPolicy: Always
+          env:
+            - name: BOOTSTRAP_SERVERS # or use another mechanism available for passing Kafka endpoint to your Kafka Streams app
+              value: "kafka-cp-kafka.kafka:9092" # or another port due to your Kafka brokers configs
+        - name: prometheus-jmx-exporter # Sidecar container to collect metrics from Kafka Streams app container MBean server and expose them to Prometheus
+          volumeMounts:
+            - name: jmx-config
+              mountPath: /etc/jmx-exporter # refer jmx-config-map.yaml below
+          image: solsson/kafka-prometheus-jmx-exporter:latest # you may use it or build your own: https://hub.docker.com/r/solsson/kafka-prometheus-jmx-exporter/dockerfile
+          command:
+            - java
+            - -jar
+            - jmx_prometheus_httpserver.jar
+            - "5556" # port to expose metrics for Prometheus
+            - /etc/jmx-exporter/jmx-prometheus.yml  # refer jmx-config-map.yaml below
+          ports:
+            - containerPort: 5556
+              name: metrics
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: kafka-streams-scaling

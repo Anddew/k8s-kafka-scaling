@@ -1,0 +1,8 @@
+cp-kafka:
+  customEnv:
+    ADVERTISED_LISTENER_HOST: ""
+  configurationOverrides:
+    "advertised.listeners": |-
+      EXTERNAL://$(ADVERTISED_LISTENER_HOST):$((31090 + ${KAFKA_BROKER_ID}))
+  nodeport:
+    enabled: true

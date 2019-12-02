@@ -1,0 +1,3 @@
+prometheus:
+  url: http://prometheus-operator-prometheus.kafka.svc
+  port: 9090

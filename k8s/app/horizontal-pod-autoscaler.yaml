@@ -1,0 +1,16 @@
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: kafka-streams-scaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kafka-streams-scaling
+  minReplicas: 1 # or set the desired min replicas value
+  maxReplicas: 3 # or set the desired min replicas value
+  metrics:
+    - type: Pods
+      pods:
+        metricName: kafka_consumer_consumer_fetch_manager_metrics_records_lag # metric name to monitor for scaling threshold exceeding
+        targetAverageValue: 10000 # the desired metric value threshold to trigger up-scaling on exceeding (you may want to set lower value for testing)
